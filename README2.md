@@ -211,7 +211,7 @@ kubectl get namespaces
 
 ### Apply All Deployments
 ```bash
-kubectl apply -f Orchestration-Project/K8s-app-deploy/Deployments/ -n voting
+kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Deployments/ -n voting
 ```
 
 ### Watch the Pods Come Up
@@ -305,33 +305,34 @@ There are two types in use here:
 - **ClusterIP** — internal only, for pod-to-pod communication (Redis, PostgreSQL, worker)
 - **LoadBalancer** — provisions a cloud load balancer with an external IP (vote UI, result UI)
 
+> For development of the manifests in a local environment, the type 'NodePort' is used.  For GCP deployments, the type is changed to 'LoadBalancer'.<br>
+<br>
+> In the Service manifests for voting and results, set the type to `loadBalancer` 
+```bash
+vi ~/Orchestration-Project/K8s-app-deploy/Services/vote-service.yaml   # Change the type to LoadBalancer
+vi ~/Orchestration-Project/K8s-app-deploy/Services/result-service.yaml  # Change the type to LoadBalancer
+
+```
+
 ### Apply Services
 ```bash
-kubectl apply -f manifests/services/ -n voting
+kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Services/ -n voting
 ```
 
 ### Verify
 ```bash
-kubectl get services -n voting
+kubectl get services -A | grep -E 'NAMESPACE|voting'
 ```
 
 The vote and result services will show an `EXTERNAL-IP`. It may take 1–2 minutes for GCP to provision the load balancer.
 
-### Test Internal DNS Resolution
+When the external IPs are visible, you can view in a browser by going to the IP address using port 8080
 
-Kubernetes automatically gives every Service a DNS name in the format `<service-name>.<namespace>.svc.cluster.local`. This is how the worker finds Redis and PostgreSQL without hardcoded IPs.
+| Voting App         | Result App         |
+|--------------------|--------------------|
+| [voting-app-image] | [result-app-image] |
 
-```bash
-# Exec into a running pod
-kubectl exec -it <vote-pod-name> -n voting -- /bin/sh
 
-# Inside the pod — test that redis is reachable by DNS name
-nslookup redis
-# or
-cat /etc/resolv.conf
-```
-
-> **Why this matters for GitLab Dedicated:** In a multi-tenant environment, services in one namespace are isolated from those in another. Understanding how Service DNS works — and where it doesn't reach — is core to understanding environment isolation.
 
 ---
 <br>
