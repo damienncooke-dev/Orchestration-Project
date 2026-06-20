@@ -219,6 +219,11 @@ Wait until all pods show `Running` with `1/1` under `READY`. Ctrl-C to stop watc
 
 ## Uh-oh! 
 ### Inspect a Deployment
+
+```bash
+kubectl get depoyments 
+```
+
 ```
 The db deployment is failing to start! 
 
@@ -255,7 +260,9 @@ Events:
 
 Note the sections: desired replicas, current replicas, image, events. This is the first place to look when something isn't working.
 
-### Key Relationship to Understand
+### Key Relationship to Understand With Deployments
+
+Deployments manage ReplicaSets and the desired number of pods running in the cluster.
 
 ```
 Deployment (desired state: 2 replicas of vote)
@@ -266,17 +273,22 @@ Deployment (desired state: 2 replicas of vote)
 
 If you delete a pod manually, the ReplicaSet creates a replacement immediately. Try it:
 ```bash
+# Scale up the voting app to 2 replicas
+kubectl scale deployment vote --replicas=2 
+
 # Get a pod name
-kubectl get pods -n voting
+kubectl get pods   # Two pods are now running
 
-# Delete it
-kubectl delete pod <vote-pod-name> -n voting
+# Delete it  
+kubectl delete pod <vote-pod-name>   # Note the last 5 digits of the pod name
 
-# Watch it get recreated
-kubectl get pods -n voting -w
+# Watch it get recreated 
+kubectl get pods -w  # Ctrl-C to stop watching.
+
 ```
+The pod will be recreated with a new name. This demonstrates that 2 pods will always be running. 
 
-> **This is self-healing.** Document what you observed — how long it took, what the events showed.
+
 
 ---
 
