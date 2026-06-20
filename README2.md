@@ -1,6 +1,6 @@
 # Kubernetes Fundamentals: Deploying the Docker Voting App on GKE
 
-> This project demonstrates foundational Kubernetes operational concepts such as deployment, service discovery, 
+This project demonstrates foundational Kubernetes operational concepts such as deployment, service discovery, 
 persistent storage, health monitoring, and troubleshooting using Docker's Example Voting App Microservice. 
 The purpose of this project was to build and strengthen practical Site Reliability Engineering skills and show production-readiness thinking.
 
@@ -15,6 +15,11 @@ This project demonstrates the foundational Kubernetes skills that underpin that 
 ---
 
 ## Application Stack (Pre-Built — Not Modified)
+The YAML manifests (Pods, Services, Deployments) live in this repository. The application code is not the focus — the **Kubernetes operational layer** is.
+
+**Time to complete:** ~2 days  
+**Cloud provider:** Google Cloud Platform (GKE)  
+**Application:** [Docker Example Voting App Microservice](https://github.com/dockersamples/example-voting-app)
 
 | Component | Technology | Role |
 |---|---|---|
@@ -23,8 +28,6 @@ This project demonstrates the foundational Kubernetes skills that underpin that 
 | worker | .NET | Processes votes from Redis to PostgreSQL |
 | db | PostgreSQL | Persistent vote store |
 | result | Node.js | Displays vote results |
-
-The YAML manifests (Pods, Services, Deployments) live in this repository. The application code is not the focus — the **Kubernetes operational layer** is.
 
 ---
 
@@ -48,44 +51,49 @@ The YAML manifests (Pods, Services, Deployments) live in this repository. The ap
 
 ## 1. Concepts Demonstrated
 
-| Kubernetes Concept | Where It Appears in This Project |
-|---|---|
-| Pods | Each app component runs as a Pod |
-| Deployments | Manages desired replica count and rollout behavior |
-| ReplicaSets | Automatically maintained by Deployments |
-| Services (ClusterIP) | Internal communication between components |
-| Services (LoadBalancer) | External access to vote and result UIs |
-| Namespaces | All components deployed into `voting` namespace |
-| ConfigMaps | Non-sensitive configuration injected into pods |
-| Secrets | PostgreSQL credentials stored as a Kubernetes Secret |
-| PersistentVolumeClaim | PostgreSQL data survives pod restarts |
-| Liveness Probe | Kubernetes restarts unhealthy pods automatically |
-| Readiness Probe | Traffic only routed to pods that are ready |
-| Rolling Update | Deploy a new version with zero downtime |
-| Rollback | Revert to a previous working version |
+| Kubernetes Concept | How It Appears in This Project                         |
+|---|--------------------------------------------------------|
+| Pods | Each app component runs as a Pod                       |
+| Deployments | Manages desired replica count and rollout behavior     |
+| ReplicaSets | Automatically maintained by Deployments                |
+| Services (ClusterIP) | Internal communication between components              |
+| Services (LoadBalancer) | External access to vote and result UIs                 |
+| Namespaces | All components deployed into `voting` namespace        |
+| ConfigMaps | Non-sensitive configuration injected into pods         |
+| Secrets | PostgreSQL credentials stored as a Kubernetes Secret   |
+| PersistentVolumeClaim | PostgreSQL data survives pod restarts                  |
+| Liveness Probe | Kubernetes restarts unhealthy pods automatically       |
+| Readiness Probe | Traffic only routed to pods that are ready             |
+| Rolling Update | Deploy a new version with zero downtime                |
+| Rollback | Revert to a previous working version                   |
 | kubectl debugging | Diagnosing CrashLoopBackOff, ImagePullBackOff, Pending |
 
 ---
 
 ## 2. Prerequisites
 
-### Tools Required
-```bash
-# Verify these are installed before starting
-gcloud version
-kubectl version --client
-```
+### Kubernetes Manifest Development and POC
+> Development of Kubernetes YAML manifests and proof-of-concept on local machine.
+* **Hypervisor:** used for creating single node deployment of Kubernetes components and container runtime.
+  * *MacOS `vfkit` is the chosen hypervisor because it is the native MacOS virtualization framework and bypasses the complexities of setting up  socket layer configurations and permissions.*
+* **Package Manager:** used for installation of the required software packages for this project.
+  * *Homebrew is the preferred PM on MacOS.  For Ubuntu/Debian systems, `apt` is commonly used.* 
+* **CLI Utility:** installation of `kubectl` utility to interact with Kubernetes cluster.
+  * *`kubectl` deployment instructions followed:* [Kubectl Install Instructions](https://kubernetes.io/docs/tasks/tools/install-kubectl-macos/)
+* **MiniKube:** lightweight Kubernetes package that contains all the necessary components to run Kubernetes locally.
+  * *Minikube deployment instructions followed:* [MiniKube Install Instructions](https://minikube.sigs.k8s.io/docs/start/?arch=%2Fmacos%2Farm64%2Fstable%2Fbinary+download)
+* **GitHub Repository:** Remote repository containing the manifest files for this project.
 
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install)
-- [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- A GCP project with billing enabled
-- GKE API enabled: `gcloud services enable container.googleapis.com`
 
-### Authenticate
-```bash
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
-```
+### Cloud Deployment at Scale
+> Deployment of a microservice application at scale using Kubernetes in a cloud environment.
+* **GitHub Repository:** for deploying project artifacts into GCP
+* **GCP Cloud Account (free tier):** Minimum resources required to implement the following:
+  * *A way to  create, manage, and scale virtual machines (VMs).* 
+  * *Access to GKE to provision a multi-node cluster (3) to deploy the application at scale.*
+  * *Ability to communication with cluster via CLI (`kubectl`).*
+  * *Deploy the microservices and manage the application lifecycle using Kubernetes.*
+  * *Expose application to external users using Kubernetes Services.*
 
 ---
 
