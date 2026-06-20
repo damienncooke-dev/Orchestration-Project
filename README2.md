@@ -330,7 +330,8 @@ When the external IPs are visible, you can view in a browser by going to the IP 
 
 | Voting App         | Result App         |
 |--------------------|--------------------|
-| [voting-app-image] | [result-app-image] |
+| <img width="392" height="2768" alt="Screenshot 2026-06-20 at 6 58 20 PM" src="https://github.com/user-attachments/assets/85b3b16c-ae9e-43d3-80a1-88d4a6982527" /> | <img width="392" height="268" alt="Screenshot 2026-06-20 at 6 58 10 PM" src="https://github.com/user-attachments/assets/58d46f65-197b-4aa7-8fd0-8c36408692c6" /> |
+
 
 
 
