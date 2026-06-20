@@ -94,35 +94,73 @@ The YAML manifests (Pods, Services, Deployments) live in this repository. The ap
   * *Ability to communication with cluster via CLI (`kubectl`).*
   * *Deploy the microservices and manage the application lifecycle using Kubernetes.*
   * *Expose application to external users using Kubernetes Services.*
-
+* **Create a GCP Project:** 
+  * *Provide a name for the project.*
 ---
 
 ## 3. Cluster Setup — GKE
 
 **Concept:** A Kubernetes cluster is the foundation — a set of nodes (VMs) managed by a control plane that schedules and runs your workloads.
 
-GKE is a *managed* Kubernetes service: Google operates the control plane, you manage what runs on it. This is the same model GitLab Dedicated uses — managed cloud Kubernetes, not self-hosted.
+GKE is a *managed* Kubernetes service: Google operates the control plane, you manage what runs on it. 
 
 ### Create the Cluster
-```bash
-gcloud container clusters create voting-cluster \
-  --zone us-central1-a \
-  --num-nodes 3 \
-  --machine-type e2-medium
-```
 
-> **Why 3 nodes?** Real workloads need headroom for failures and scheduling. A single node has no resilience — if it goes down, everything goes with it.
+Cluster creation is a one-time process done through the GCP Dashboard.
+1. Go to the [GCP Console](https://console.cloud.google.com/).
+2. Provide loging and authorization credentials.
+3. From the main navigation menu in the upper left hand corner, select **Kubernetes Engine**.
+4. In this space you will create a standard GKE cluster. If asked **Enable Kubernetes API**.
+5. Select **Create Cluster**. (See alternate instructions below for manual cluster creation)
+6. Your default cluster will be the "GKE AutoPilot Cluster", in the upper right hand corner select **Switch to Standard Cluster**.
+7. Provide a name for your cluster: [`vote-app-deployment`].
+8. Provide a region, in this case keep default "Zonal:" [`us-central1`]. (Free tier status does not allow for regional clusters due to quota limits)
+9. Configure the following under Node Pool "default-pool" and "Nodes" settings:
+   * **[default-pool]: Node Count:** 3
+   * **[default-pool]: Enable Spot VMs** (VMs can be reclaimed at any time)
+   * **[Nodes]: Machine Type:** `General Purpose, e2-small(2 vCPUs, 1 core, 2 GB RAM)`
+   * **[Nodes]: Disk Size:** `10` GB
+10. Click **Create**.
+11. Cluster creation can take a few minutes. 
+12. After successful creation of the cluster, you will the cluster details in the dashboard with 3 nodes, 6 virtual CPUs, and 12 GB of RAM. 
+13. To see node details, click on the cluster name and select the tab **Nodes**.
+
+
+Alternatively, the GCP Cloud Shell can be used to create the cluster starting from step 5 above. 
+1. From the upper right hand corner of the dashboard, select **Cloud Shell**.
+2. Once the shell initializes, enter the following command:
+```bash
+ggcloud container clusters create voting-app-deployment \
+    --zone=us-central1-a \
+    --num-nodes=3 \
+    --machine-type=e2-small \
+    --spot \
+    --disk-size=30
+    
+```
+3. After successful creation of the cluster, you will see the cluster details in the dashboard with 3 nodes, 6 vCPUs, 6 GB of memory.
+
 
 ### Connect kubectl to the Cluster
+1. The cluster can be accessed via the `gcloud` CLI utility.
+2. From the UI menu at the top, select **Connect** and choose **Command-line access** and **Run in Cloud Shell**.
+3. The GCP Cloud Shell will open up and will be pre-prompted with the command to connect `kubectl` to the cluster.
 ```bash
-gcloud container clusters get-credentials voting-cluster --zone us-central1-a
+gcloud container clusters get-credentials voting-app-deployment --zone us-central1-a --project <accept-default-project-id>
 ```
 
 ### Verify the Cluster is Healthy
 ```bash
 kubectl get nodes
 ```
+```
+💡 Pro Tip: It gets very tiresome typing 'kubectl' all the time...
 
+alias k='kubectl'
+
+k get nodes
+
+```
 Expected output: three nodes in `Ready` status.
 
 ```
@@ -132,6 +170,11 @@ gke-voting-cluster-default-pool-...   Ready    <none>   2m    v1.28.x
 gke-voting-cluster-default-pool-...   Ready    <none>   2m    v1.28.x
 ```
 
+### Clone the release 
+
+```bash
+git clone https://github.com/damienncooke-dev/Orchestration-Project.git
+```
 ---
 
 ## 4. Namespaces — Logical Isolation
@@ -145,10 +188,10 @@ kubectl create namespace voting
 
 ### Set it as the Default for This Session
 ```bash
-kubectl config set-context --current --namespace=voting
+kubectl config set-context $(kubectl config current-context) --namespace=voting
 ```
 
-> **Why this matters:** Without namespaces, everything lands in `default`. In a team or multi-tenant environment, that becomes unmanageable fast. The habit of using namespaces from day one is what separates someone who has worked in production from someone who hasn't.
+> **Why this matters:** Without namespaces, everything lands in `default`. In a team or multi-tenant environment, we need to isolate workloads from each other.
 
 ### Verify
 ```bash
@@ -161,21 +204,53 @@ kubectl get namespaces
 
 **Concepts:** Deployments declare the *desired state* of a workload — how many replicas, which image, what resources. Kubernetes continuously works to match reality to that declaration. ReplicaSets are created automatically by the Deployment to maintain the replica count.
 
+
 ### Apply All Deployments
 ```bash
-kubectl apply -f manifests/deployments/ -n voting
+kubectl apply -f Orchestration-Project/K8s-app-deploy/Deployments/ -n voting
 ```
 
 ### Watch the Pods Come Up
 ```bash
-kubectl get pods -n voting -w
+kubectl get pods -w
 ```
 
-Wait until all pods show `Running` with `1/1` under `READY`.
+Wait until all pods show `Running` with `1/1` under `READY`. Ctrl-C to stop watching.
 
+## Uh-oh! 
 ### Inspect a Deployment
-```bash
-kubectl describe deployment vote -n voting
+```
+The db deployment is failing to start! 
+
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE
+db       0/1     1            0           3m28s
+redis    1/1     1            1           3m28s
+result   1/1     1            1           3m28s
+vote     1/1     1            1           3m28s
+worker   1/1     1            1           3m28s
+
+...checking the pod events
+
+kubectl get pods
+
+NAME                      READY   STATUS                       RESTARTS   AGE
+db-5867dd7898-8lmp2       0/1     CreateContainerConfigError   0          29s
+redis-65cd7744b9-whtld    1/1     Running                      0          29s
+result-5dcb6664d4-27j9c   1/1     Running                      0          29s
+vote-7cff9b8dfc-zdg8g     1/1     Running                      0          29s
+worker-545d464b96-qnxmn   1/1     Running                      0          28s
+
+kubectl describe db-5867dd7898-8lmp2
+
+Events:
+  Type     Reason     Age                   From               Message
+  ----     ------     ----                  ----               -------
+  Normal   Scheduled  6m33s                 default-scheduler  Successfully assigned voting/db-5867dd7898-8lmp2 to gke-voting-app-deploymen-default-pool-02a1fe9b-lj02
+  Normal   Pulled     75s (x26 over 6m32s)  kubelet            spec.containers{postgres}: Container image "postgres:15-alpine" already present on machine and can be accessed by the pod
+  Warning  Failed     75s (x26 over 6m32s)  kubelet            spec.containers{postgres}: Error: secret "db-secrets" not found
+  
+ The secres has not been created yet, and this is expected. It will be addressed in an upcoming section (seting 7).
+
 ```
 
 Note the sections: desired replicas, current replicas, image, events. This is the first place to look when something isn't working.
