@@ -1,8 +1,9 @@
-# Kubernetes Voting App SRE Demonstration
+# Kubernetes Fundamentals: Deploying the Docker Voting App on GKE
 ## Overview
-This project demonstrates foundational Kubernetes operational concepts using Docker's Example Voting App.
-The focus is on Kubernetes deployment, service discovery, persistent storage, health monitoring, and troubleshooting.
-This project was built to strengthen practical Site Reliability Engineering skills.
+
+This project demonstrates foundational Kubernetes operational concepts such as deployment, service discovery, 
+persistent storage, health monitoring, and troubleshooting using Docker's Example Voting App Microservice. 
+The purpose of this project was to build and strengthen practical Site Reliability Engineering skills and show production-readiness thinking.
 ---
 ## Objectives
 - Deploy containerized workloads into Kubernetes
