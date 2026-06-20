@@ -69,6 +69,7 @@ The YAML manifests (Pods, Services, Deployments) live in this repository. The ap
 | kubectl debugging | Diagnosing CrashLoopBackOff, ImagePullBackOff, Pending |
 
 ---
+<br>
 
 ## 2. Prerequisites
 
@@ -97,6 +98,7 @@ The YAML manifests (Pods, Services, Deployments) live in this repository. The ap
 * **Create a GCP Project:** 
   * *Provide a name for the project.*
 ---
+<br>
 
 ## 3. Cluster Setup — GKE
 
@@ -176,6 +178,7 @@ gke-voting-cluster-default-pool-...   Ready    <none>   2m    v1.28.x
 git clone https://github.com/damienncooke-dev/Orchestration-Project.git
 ```
 ---
+<br>
 
 ## 4. Namespaces — Logical Isolation
 
@@ -199,6 +202,7 @@ kubectl get namespaces
 ```
 
 ---
+<br>
 
 ## 5. Deploying the Application
 
@@ -236,7 +240,7 @@ worker   1/1     1            1           3m28s
 
 ...checking the pod events
 
-kubectl get pods
+(~)$ kubectl get pods
 
 NAME                      READY   STATUS                       RESTARTS   AGE
 db-5867dd7898-8lmp2       0/1     CreateContainerConfigError   0          29s
@@ -245,7 +249,7 @@ result-5dcb6664d4-27j9c   1/1     Running                      0          29s
 vote-7cff9b8dfc-zdg8g     1/1     Running                      0          29s
 worker-545d464b96-qnxmn   1/1     Running                      0          28s
 
-kubectl describe db-5867dd7898-8lmp2
+(~)$ kubectl describe db-5867dd7898-8lmp2
 
 Events:
   Type     Reason     Age                   From               Message
@@ -291,6 +295,7 @@ The pod will be recreated with a new name. This demonstrates that 2 pods will al
 
 
 ---
+<br>
 
 ## 6. Services — Internal and External Networking
 
@@ -329,6 +334,8 @@ cat /etc/resolv.conf
 > **Why this matters for GitLab Dedicated:** In a multi-tenant environment, services in one namespace are isolated from those in another. Understanding how Service DNS works — and where it doesn't reach — is core to understanding environment isolation.
 
 ---
+<br>
+
 
 ## 7. ConfigMaps and Secrets
 
@@ -371,6 +378,8 @@ env:
 > **Note:** Kubernetes Secrets are base64-encoded, not encrypted. In production (including GitLab Dedicated), secrets are backed by cloud KMS (GCP Secret Manager, AWS Secrets Manager, Azure Key Vault). This project demonstrates the Kubernetes-native pattern; the cloud-native enhancement is the next step.
 
 ---
+<br>
+
 
 ## 8. Persistent Storage for PostgreSQL
 
@@ -424,6 +433,8 @@ kubectl get pods -n voting -w
 ```
 
 ---
+<br>
+
 
 ## 9. Health Checks — Liveness and Readiness Probes
 
@@ -475,6 +486,8 @@ Restore the correct path and reapply to resolve.
 > - Readiness failure → pod stays running but receives zero traffic
 
 ---
+<br>
+
 
 ## 10. Rolling Updates and Rollback
 
@@ -518,6 +531,8 @@ kubectl get pods -n voting
 > **Why this matters:** This is the fundamental operational loop in any Kubernetes environment — deploy, verify, rollback if needed. GitLab Dedicated automates this at scale across hundreds of environments; understanding the manual version is the prerequisite.
 
 ---
+<br>
+
 
 ## 11. Debugging — What Breaks and How to Fix It
 
@@ -577,6 +592,8 @@ kubectl describe pod <pod-name> -n voting
 | General confusion | `kubectl get events --sort-by=.lastTimestamp` | Most recent cluster events |
 
 ---
+<br>
+
 
 ## 12. Cleanup
 
@@ -591,6 +608,7 @@ gcloud container clusters delete voting-cluster --zone us-central1-a
 ```
 
 ---
+<br>
 
 ## 13. What I Would Do Next
 
@@ -609,6 +627,7 @@ This project covers the foundational layer. The following represents the natural
 The advanced outline is intentionally documented to show awareness of where this work leads — not as a claim that it's already complete.
 
 ---
+<br>
 
 ## References
 
