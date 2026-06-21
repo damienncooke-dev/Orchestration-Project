@@ -330,7 +330,7 @@ When the external IPs are visible, you can view in a browser by going to the IP 
 
 | Voting App         | Result App         |
 |--------------------|--------------------|
-| <img width="527" height="278" alt="Screenshot 2026-06-20 at 6 58 20 PM" src="https://github.com/user-attachments/assets/019be681-539b-428a-9569-83d9e9f62c04" />  |  <img width="392" height="268" alt="Screenshot 2026-06-20 at 6 58 20 PM" src="https://github.com/user-attachments/assets/85b3b16c-ae9e-43d3-80a1-88d4a6982527" />|
+| <img width="392" height="268" alt="Screenshot 2026-06-20 at 6 58 10 PM" src="https://github.com/user-attachments/assets/0249278f-e85c-4600-ab65-347c25843b12" /> |  <img width="392" height="268" alt="Screenshot 2026-06-20 at 6 58 20 PM" src="https://github.com/user-attachments/assets/85b3b16c-ae9e-43d3-80a1-88d4a6982527" />|
 
 
 ### At this point, the voting results will not update due to the lack of secret information. That will be addressed in the next section.
