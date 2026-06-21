@@ -402,10 +402,14 @@ data:
  POSTGRES_USER: cG9zd....
  POSTGRES_PASSWORD: cG9zd...
  
- 
-## Full base-64 encoded data is not an actual user or password. 
+ # Not actual base64-encoded values. 
 
 ```
+
+> **Note:** Kubernetes Secrets are base64-encoded, not encrypted. In production (including GitLab Dedicated), secrets are backed by cloud KMS (GCP Secret Manager, AWS Secrets Manager, Azure Key Vault). This project demonstrates the Kubernetes-native pattern; the cloud-native enhancement is the next step.
+<br>
+
+
 ### Create 
 ```bash
 kubectl create -f ~/Orchestration-Project/K8s-app-deploy/Secrets/db-secrets.yaml
@@ -430,7 +434,6 @@ kubectl describe secret db-credentials -n voting
 Voting App is Working!!
 
 
-> **Note:** Kubernetes Secrets are base64-encoded, not encrypted. In production (including GitLab Dedicated), secrets are backed by cloud KMS (GCP Secret Manager, AWS Secrets Manager, Azure Key Vault). This project demonstrates the Kubernetes-native pattern; the cloud-native enhancement is the next step.
 
 ---
 <br>
