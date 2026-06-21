@@ -201,6 +201,7 @@ kubectl config set-context $(kubectl config current-context) --namespace=voting
 ```bash
 kubectl get namespaces
 ```
+**For the rest of this project, we will not specify the namespace since it is set as the current context.**
 
 ---
 <br>
@@ -212,7 +213,7 @@ kubectl get namespaces
 
 ### Apply All Deployments
 ```bash
-kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Deployments/ -n voting
+kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Deployments/ 
 ```
 
 ### Watch the Pods Come Up
@@ -317,7 +318,7 @@ vi ~/Orchestration-Project/K8s-app-deploy/Services/result-service.yaml  # Change
 
 ### Apply Services
 ```bash
-kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Services/ -n voting
+kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Services/ 
 ```
 
 ### Verify
@@ -419,7 +420,7 @@ kubectl create -f ~/Orchestration-Project/K8s-app-deploy/Secrets/db-secrets.yaml
 
 ### Verify
 ```bash
-kubectl get secrets -n voting
+kubectl get secrets 
 
 # Inspect (values are base64-encoded, not plaintext)
 kubectl describe secret db-credentials -n voting
@@ -487,7 +488,6 @@ containers:
     volumeMounts:
       - name: postgres-storage
         mountPath: /var/lib/postgresql/data<img width="480" height="204" alt="Screenshot 2026-06-20 at 9 18 03 PM" src="https://github.com/user-attachments/assets/de3ca3f8-2851-48d7-859f-cf4645e031be" />
-
         subPath: dbdata
 
 ```
@@ -495,17 +495,21 @@ containers:
 ### Verify Persistence
 ```bash
 # Cast a few votes through the UI, then delete the db pod
-kubectl delete pod <db-pod-name> -n voting
+kubectl delete pod <db-pod-name> 
 
 # Kubernetes recreates it, reattaching the same PVC
-kubectl get pods -n voting -w
+kubectl get pods -w
 
 
 ```
 ### Open the result UI — votes should still be there
 
 **NOTE: There has been instances where the result UI will not reconnect to DB and will need to be restarted also. When it does, the data is persisted and the previous result is still available.**
+```bash
+# If the result UI has not updated after the db has restarted.
+kubectl delete pod <results-pod-name> 
 
+```
 
 | Voting App     | Result App |
 |----------------|------------|
