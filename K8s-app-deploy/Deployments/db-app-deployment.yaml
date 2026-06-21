@@ -28,7 +28,10 @@ spec:
           envFrom:
             - secretRef:
                name: db-secrets
+          env:
+            - name: DBDATA
+              value: /var/lib/postgresssql/data/dbdata
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgress-storage
-      
+            - name: postgress-storage
+              mountPath: /var/lib/postgresql/data
+              subPath: dbdata
