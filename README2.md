@@ -1,3 +1,4 @@
+
 # Kubernetes Fundamentals: Deploying the Docker Voting App on GKE
 
 This project demonstrates foundational Kubernetes operational concepts such as deployment, service discovery, 
@@ -423,11 +424,10 @@ kubectl describe secret db-credentials -n voting
 
 | Voting App | Result App |
 |------------|------------|
-| <img dog>  | <img dogs> |
-| <img cat>  | <img cat>  |
+|<img width="392" height="268" alt="Screenshot 2026-06-20 at 8 54 08 PM" src="https://github.com/user-attachments/assets/c01dade8-d20c-45e3-9a17-957a1204c514" /> |  <img width="392" height="268" alt="Screenshot 2026-06-20 at 8 53 59 PM" src="https://github.com/user-attachments/assets/0dcb37ce-7dd0-48de-86b9-44b33dde2493" /> |
+|<img width="392" height="268" alt="Screenshot 2026-06-20 at 8 54 19 PM" src="https://github.com/user-attachments/assets/c3b06612-9f1a-49ca-a647-b0b00276dee8" /> |  <img width="392" height="268" alt="Screenshot 2026-06-20 at 8 54 31 PM" src="https://github.com/user-attachments/assets/c2e2a725-80de-4cb3-b941-c981f3272e6b" />  |
 
-
-
+Voting App is Working!!
 
 
 > **Note:** Kubernetes Secrets are base64-encoded, not encrypted. In production (including GitLab Dedicated), secrets are backed by cloud KMS (GCP Secret Manager, AWS Secrets Manager, Azure Key Vault). This project demonstrates the Kubernetes-native pattern; the cloud-native enhancement is the next step.
