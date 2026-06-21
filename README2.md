@@ -581,38 +581,88 @@ Restore the correct path and reapply to resolve.
 **Concept:** Kubernetes can update a running Deployment to a new image version with zero downtime by gradually replacing old pods with new ones. If the new version is broken, you can roll back to the previous version instantly.
 
 ### Trigger a Rolling Update
+Update the image on the postgres db-deployment: [old Image: `redis:redis`] [new Image: `redis:latest`]
 ```bash
 # Simulate updating to a new image version
-kubectl set image deployment/vote vote=vote:v2 -n voting
+kubectl set image deployment/redis redis=redis:latest 
 
-# Watch the rollout
-kubectl rollout status deployment/vote -n voting
-```
+# Watch the rollout - wait for it to complete successfully
+kubectl rollout status deployment/redis   
+````
+A successful rollout message will be display `deployment "redis" successfully rolled out`
 
-Kubernetes brings up new pods before terminating old ones — traffic continues during the update.
+Kubernetes brings up new pods before terminating old ones — traffic continues during the update.  There are a few ways to verify the update:
 
-### View Rollout History
+1. Confirm that the pod is running and a new image has been set:
 ```bash
-kubectl rollout history deployment/vote -n voting
+# Check for running pods
+kubectl get pods
+
+# Check that the image has been updated
+kubectl describe pod <redis-pod-name>  | grep Image:
+````
+2. Observe that the pod was brought up first before scaling down the old ones:
+```bash
+# Get deployments
+kubectl get deployments
+
+# View deployment events
+kubectl describe deployment/redis
 ```
+```
+ Type    Reason             Age    From                   Message
+  ----    ------             ----   ----                   -------
+  Normal  ScalingReplicaSet  4m39s  deployment-controller  Scaled up replica set redis-6f5f7488 from 0 to 1
+  Normal  ScalingReplicaSet  4m34s  deployment-controller  Scaled down replica set redis-7bb95dd47b from 1 to 0
+
+- The pod was brough up on the new image before the old ones were terminated.
+
+```
+3. Confirm the application is still working
+```
+The votes are still updating in the results UI.
+```
+4. View the deployment history
+```bash
+# Show deployment history
+kubectl rollout history deployment/redis
+```
+
+```
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+
+This shows that we went from revision 1 to revision 2.
+```
+
 
 ### Simulate a Bad Deploy
 ```bash
 # Set a non-existent image tag
-kubectl set image deployment/vote vote=vote:this-tag-does-not-exist -n voting
+kubectl set image deployment/redis redis=redis:latest-bad 
 
 # Watch it fail
-kubectl get pods -n voting -w
+kubectl get pods  -w
+
 # New pods will show ImagePullBackOff
+NAME                      READY   STATUS             RESTARTS      AGE
+db-9bf4d5686-d46ct        1/1     Running            0             24m
+redis-6d4d567d94-82wqn    0/1     ImagePullBackOff   0             19s
+
 ```
 
 ### Roll Back
 ```bash
-kubectl rollout undo deployment/vote -n voting
+kubectl rollout undo deployment/redis 
 
 # Confirm recovery
-kubectl rollout status deployment/vote -n voting
-kubectl get pods -n voting
+kubectl rollout status deployment/vote 
+kubectl get pods 
+
+# Confirm the rollback to the previous version was successful
+kubectl describe pod <redis-pod-name>  | grep Image:
+
 ```
 
 > **Why this matters:** This is the fundamental operational loop in any Kubernetes environment — deploy, verify, rollback if needed. GitLab Dedicated automates this at scale across hundreds of environments; understanding the manual version is the prerequisite.
