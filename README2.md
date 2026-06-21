@@ -481,9 +481,15 @@ volumes:
       claimName: db-pvc
 containers:
   - name: db
+    env:
+      - name: DBDATA
+        value: /var/lib/postgresql/data/dbdata
     volumeMounts:
-      - mountPath: /var/lib/postgresql/data
-        name: postgres-storage
+      - name: postgres-storage
+        mountPath: /var/lib/postgresql/data<img width="480" height="204" alt="Screenshot 2026-06-20 at 9 18 03 PM" src="https://github.com/user-attachments/assets/de3ca3f8-2851-48d7-859f-cf4645e031be" />
+
+        subPath: dbdata
+
 ```
 
 ### Verify Persistence
@@ -503,13 +509,9 @@ kubectl get pods -n voting -w
 
 | Voting App     | Result App |
 |----------------|------------|
-| Before Failure | [image 1]  |
-| During Failure | [image 2]  |
-| After Restart  | [image 3]  |
-
-
-
-
+| Before Failure | <img width="392" height="268" alt="Screenshot 2026-06-20 at 9 18 03 PM" src="https://github.com/user-attachments/assets/673463dc-5ba0-47f0-9a70-4b2cec58fe7e" />|
+| During Failure | <img width="392" height="268" alt="Screenshot 2026-06-20 at 9 19 05 PM" src="https://github.com/user-attachments/assets/7b416697-d96f-4820-aaf7-6d4473ace00d" />|
+| After Restart  | <img width="392" height="268" alt="Screenshot 2026-06-21 at 12 13 37 AM" src="https://github.com/user-attachments/assets/312200b4-6dd6-4f9b-9e98-96a144d35703" />|
 
 
 
