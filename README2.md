@@ -305,7 +305,7 @@ There are two types in use here:
 - **ClusterIP** — internal only, for pod-to-pod communication (Redis, PostgreSQL, worker)
 - **LoadBalancer** — provisions a cloud load balancer with an external IP (vote UI, result UI)
 
-> For development of the manifests in a local environment, the type 'NodePort' is used.  For GCP deployments, the type is changed to 'LoadBalancer'.<br>
+> For development of the manifests in a local environment, the type 'NodePort' is used.  For GCP deployments, the type is changed to 'LoadBalancer'. This tells GCP to provision an external load balancer and expose this service to the internet.<br>
 <br>
 > In the Service manifests for voting and results, set the type to `loadBalancer` 
 ```bash
@@ -326,14 +326,14 @@ kubectl get services -A | grep -E 'NAMESPACE|voting'
 
 The vote and result services will show an `EXTERNAL-IP`. It may take 1–2 minutes for GCP to provision the load balancer.
 
-When the external IPs are visible, you can view in a browser by going to the IP address using port 8080
+When the external IPs are visible, you can view in a browser by going to the IP address using port 8080. The following images will be displayed:
 
 | Voting App         | Result App         |
 |--------------------|--------------------|
 | <img width="527" height="278" alt="Screenshot 2026-06-20 at 6 58 20 PM" src="https://github.com/user-attachments/assets/019be681-539b-428a-9569-83d9e9f62c04" />  |  <img width="392" height="268" alt="Screenshot 2026-06-20 at 6 58 20 PM" src="https://github.com/user-attachments/assets/85b3b16c-ae9e-43d3-80a1-88d4a6982527" />|
 
 
-
+### At this point, the voting results will not update due to the lack of secret information. That will be addressed in the next section.
 
 ---
 <br>
@@ -344,23 +344,75 @@ When the external IPs are visible, you can view in a browser by going to the IP 
 **Concept:** Configuration and credentials should never be baked into container images. ConfigMaps hold non-sensitive config. Secrets hold sensitive values (passwords, tokens). Both inject values into pods at runtime, keeping images portable and environment-agnostic.
 
 ### Create a ConfigMap for Redis Hostname
+
+In this section, injecting configuration into the redis deployment is demonstrated. A configmap is created, and the deployment is updated to reference the name of the configmap. **The change has no functional relevance** but will show how the environment setting is in place by viewing the environment variables on the pod.
 ```bash
 kubectl create configmap app-config \
   --from-literal=REDIS_HOST=redis \
   -n voting
 ```
+...update the deployment [`~/Orchestration-Project/K8s-app-deploy/Deployments/redis-app-deployment.yaml`] to reference the configmap
+```yaml
+containers:
+  - name: 
+    ...
+    envFrom:
+    - configMapRef:
+        name: app-config
+```
+...apply the changes for the deployment to pick up the environment variable...
+
+```bash
+kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/Deployments/redis-app-deployment.yaml 
+
+```
+...check pod status...
+```bash
+kubectl get pods 
+
+```
+
+...ssh into the redis pod and check the environment variables...
+
+```bash
+# Exec into a running pod
+kubectl exec -it <redis-pod-name>  -- /bin/sh
+```
+```bash
+# grep the environment variables
+env | grep REDIS_HOST
+
+```
+
+...the environment variable REDIS_HOST is set to `redis` <br>
+<br>
+
 
 ### Create a Secret for PostgreSQL Credentials
+
+A secret YAML file is already created for this project.   The data inside the file is base64-encoded.  Once the secret is created, the voting app should begin to work.
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+   name: db-secrets
+data:
+ POSTGRES_USER: cG9zd....
+ POSTGRES_PASSWORD: cG9zd...
+ 
+ 
+## Full base-64 encoded data is not an actual user or password. 
+
+```
+### Create 
 ```bash
-kubectl create secret generic db-credentials \
-  --from-literal=POSTGRES_PASSWORD=your_password \
-  --from-literal=POSTGRES_USER=postgres \
-  -n voting
+kubectl create -f ~/Orchestration-Project/K8s-app-deploy/Secrets/db-secrets.yaml
+
 ```
 
 ### Verify
 ```bash
-kubectl get configmaps -n voting
 kubectl get secrets -n voting
 
 # Inspect (values are base64-encoded, not plaintext)
@@ -368,14 +420,15 @@ kubectl describe secret db-credentials -n voting
 ```
 
 ### Reference in a Deployment (example)
-```yaml
-env:
-  - name: POSTGRES_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: db-credentials
-        key: POSTGRES_PASSWORD
-```
+
+| Voting App | Result App |
+|------------|------------|
+| <img dog>  | <img dogs> |
+| <img cat>  | <img cat>  |
+
+
+
+
 
 > **Note:** Kubernetes Secrets are base64-encoded, not encrypted. In production (including GitLab Dedicated), secrets are backed by cloud KMS (GCP Secret Manager, AWS Secrets Manager, Azure Key Vault). This project demonstrates the Kubernetes-native pattern; the cloud-native enhancement is the next step.
 
