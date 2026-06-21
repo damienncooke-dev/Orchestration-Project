@@ -15,6 +15,10 @@ spec:
       labels:
         app: db
     spec:
+      volumes:
+        - name: postgress-storage
+          persistentVolumeClaim:
+            claimName: db-pvc
       containers:
         - name: postgres
           image: postgres:15-alpine
@@ -24,4 +28,10 @@ spec:
           envFrom:
             - secretRef:
                name: db-secrets
-      
+          env:
+            - name: DBDATA
+              value: /var/lib/postgresssql/data/dbdata
+          volumeMounts:
+            - name: postgress-storage
+              mountPath: /var/lib/postgresql/data
+              subPath: dbdata
