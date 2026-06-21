@@ -393,7 +393,8 @@ env | grep REDIS_HOST
 
 A secret YAML file is already created for this project.   The data inside the file is base64-encoded.  Once the secret is created, the voting app should begin to work.
 
-```
+```yaml
+# ~/Orchestration-Project/K8s-app-deploy/Secrets/db-secrets.yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -449,7 +450,7 @@ Voting App is Working!!
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: postgres-pvc
+  name: db-pvc
   namespace: voting
 spec:
   accessModes:
@@ -460,18 +461,24 @@ spec:
 ```
 
 ```bash
-kubectl apply -f manifests/pvc/postgres-pvc.yaml -n voting
-kubectl get pvc -n voting
+kubectl apply -f ~/Orchestration-Project/K8s-app-deploy/pvc/db-pvc.yaml 
+kubectl get pvc
 ```
 
 Watch the STATUS column change from `Pending` to `Bound`. GKE is dynamically provisioning the disk.
+
+```
+NAME     STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+db-pvc   Bound    pvc-1a7f5bb0-338f-4b67-...................   1Gi        RWO            standard-rwo   <unset>                 22m
+
+```
 
 ### Mount It in the PostgreSQL Deployment
 ```yaml
 volumes:
   - name: postgres-storage
     persistentVolumeClaim:
-      claimName: postgres-pvc
+      claimName: db-pvc
 containers:
   - name: db
     volumeMounts:
@@ -487,8 +494,24 @@ kubectl delete pod <db-pod-name> -n voting
 # Kubernetes recreates it, reattaching the same PVC
 kubectl get pods -n voting -w
 
-# Open the result UI — votes should still be there
+
 ```
+### Open the result UI — votes should still be there
+
+**NOTE: There has been instances where the result UI will not reconnect to DB and will need to be restarted also. When it does, the data is persisted and the previous result is still available.**
+
+
+| Voting App     | Result App |
+|----------------|------------|
+| Before Failure | [image 1]  |
+| During Failure | [image 2]  |
+| After Restart  | [image 3]  |
+
+
+
+
+
+
 
 ---
 <br>
